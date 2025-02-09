@@ -178,7 +178,7 @@ public class WaitForTests(ITestOutputHelper testOutputHelper)
         var dependency = builder.AddResource(new CustomResource("test"));
         var nginx = builder.AddContainer("nginx", "mcr.microsoft.com/cbl-mariner/base/nginx", "1.22")
                            .WithReference(dependency)
-                           .WaitFor(dependency, WaitBehavior.StopOnDependencyFailure);
+                           .WaitFor(dependency, WaitBehavior.StopOnResourceFailure);
 
         using var app = builder.Build();
 
@@ -248,7 +248,7 @@ public class WaitForTests(ITestOutputHelper testOutputHelper)
         var dependency = builder.AddResource(new CustomResource("test"));
         var nginx = builder.AddContainer("nginx", "mcr.microsoft.com/cbl-mariner/base/nginx", "1.22")
                            .WithReference(dependency)
-                           .WaitFor(dependency, WaitBehavior.WaitOnDependencyFailure);
+                           .WaitFor(dependency, WaitBehavior.WaitOnResourceFailure);
 
         using var app = builder.Build();
 
@@ -290,7 +290,7 @@ public class WaitForTests(ITestOutputHelper testOutputHelper)
 
         builder.Services.Configure<ResourceNotificationServiceOptions>(o =>
         {
-            o.DefaultWaitBehavior = WaitBehavior.WaitOnDependencyFailure;
+            o.DefaultWaitBehavior = WaitBehavior.WaitOnResourceFailure;
         });
 
         var dependency = builder.AddResource(new CustomResource("test"));
