@@ -50,7 +50,7 @@ public class ResourceNotificationService : IDisposable
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceProvider = new NullServiceProvider();
         _resourceLoggerService = new ResourceLoggerService();
-        DefaultWaitBehavior = WaitBehavior.StopOnResourceFailure;
+        DefaultWaitBehavior = WaitBehavior.StopOnResourceUnavailable;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class ResourceNotificationService : IDisposable
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceProvider = serviceProvider;
         _resourceLoggerService = resourceLoggerService ?? throw new ArgumentNullException(nameof(resourceLoggerService));
-        DefaultWaitBehavior = serviceProvider.GetService<IOptions<ResourceNotificationServiceOptions>>()?.Value.DefaultWaitBehavior ?? WaitBehavior.StopOnResourceFailure;
+        DefaultWaitBehavior = serviceProvider.GetService<IOptions<ResourceNotificationServiceOptions>>()?.Value.DefaultWaitBehavior ?? WaitBehavior.StopOnResourceUnavailable;
 
         // The IHostApplicationLifetime parameter is not used anymore, but we keep it for backwards compatibility.
         // Notification updates will be cancelled when the service is disposed.
@@ -161,7 +161,7 @@ public class ResourceNotificationService : IDisposable
             var resourceEvent = await WaitForResourceCoreAsync(dependency.Name, re => re.ResourceId == resourceId && IsContinuableState(waitBehavior, re.Snapshot), cancellationToken: cancellationToken).ConfigureAwait(false);
             var snapshot = resourceEvent.Snapshot;
 
-            if (waitBehavior == WaitBehavior.StopOnResourceFailure)
+            if (waitBehavior == WaitBehavior.StopOnResourceUnavailable)
             {
                 if (snapshot.State?.Text == KnownResourceStates.FailedToStart)
                 {
@@ -208,8 +208,8 @@ public class ResourceNotificationService : IDisposable
             static bool IsContinuableState(WaitBehavior waitBehavior, CustomResourceSnapshot snapshot) =>
                 waitBehavior switch
                 {
-                    WaitBehavior.WaitOnResourceFailure => snapshot.State?.Text == KnownResourceStates.Running,
-                    WaitBehavior.StopOnResourceFailure => snapshot.State?.Text == KnownResourceStates.Running ||
+                    WaitBehavior.WaitOnResourceUnavailable => snapshot.State?.Text == KnownResourceStates.Running,
+                    WaitBehavior.StopOnResourceUnavailable => snapshot.State?.Text == KnownResourceStates.Running ||
                                                             snapshot.State?.Text == KnownResourceStates.Finished ||
                                                             snapshot.State?.Text == KnownResourceStates.Exited ||
                                                             snapshot.State?.Text == KnownResourceStates.FailedToStart ||
@@ -231,7 +231,7 @@ public class ResourceNotificationService : IDisposable
     /// </remarks>
     public Task<ResourceEvent> WaitForResourceHealthyAsync(string resourceName, CancellationToken cancellationToken = default)
     {
-        return WaitForResourceHealthyAsync(resourceName, WaitBehavior.WaitOnResourceFailure, cancellationToken);
+        return WaitForResourceHealthyAsync(resourceName, WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
     }
 
     /// <summary>
@@ -257,8 +257,8 @@ public class ResourceNotificationService : IDisposable
         static bool ShouldYield(WaitBehavior waitBehavior, CustomResourceSnapshot snapshot) =>
             waitBehavior switch
             {
-                WaitBehavior.WaitOnResourceFailure => snapshot.HealthStatus == HealthStatus.Healthy,
-                WaitBehavior.StopOnResourceFailure => snapshot.HealthStatus == HealthStatus.Healthy ||
+                WaitBehavior.WaitOnResourceUnavailable => snapshot.HealthStatus == HealthStatus.Healthy,
+                WaitBehavior.StopOnResourceUnavailable => snapshot.HealthStatus == HealthStatus.Healthy ||
                                                       snapshot.State?.Text == KnownResourceStates.Finished ||
                                                       snapshot.State?.Text == KnownResourceStates.Exited ||
                                                       snapshot.State?.Text == KnownResourceStates.FailedToStart ||
