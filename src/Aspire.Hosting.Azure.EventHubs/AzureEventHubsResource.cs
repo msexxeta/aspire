@@ -33,7 +33,10 @@ public class AzureEventHubsResource(string name, Action<AzureResourceInfrastruct
     /// </summary>
     public BicepOutputReference EventHubsEndpoint => new("eventHubsEndpoint", this);
 
-    private BicepOutputReference NameOutputReference => new("name", this);
+    /// <summary>
+    /// Gets the "name" output reference from the bicep template for the Azure Event Hubs resource.
+    /// </summary>
+    public BicepOutputReference NameOutputReference => new("name", this);
 
     internal EndpointReference EmulatorEndpoint => new(this, "emulator");
 

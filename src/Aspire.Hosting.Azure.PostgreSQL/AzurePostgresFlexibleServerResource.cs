@@ -35,7 +35,10 @@ public class AzurePostgresFlexibleServerResource(string name, Action<AzureResour
     /// </summary>
     internal IAzureKeyVaultSecretReference? ConnectionStringSecretOutput { get; set; }
 
-    private BicepOutputReference NameOutputReference => new("name", this);
+    /// <summary>
+    /// Gets the "name" output reference from the bicep template for the Azure Postgres Flexible Server resource.
+    /// </summary>
+    public BicepOutputReference NameOutputReference => new("name", this);
 
     /// <summary>
     /// Gets a value indicating whether the resource uses password authentication.

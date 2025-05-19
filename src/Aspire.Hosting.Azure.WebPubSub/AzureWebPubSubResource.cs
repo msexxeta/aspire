@@ -22,7 +22,10 @@ public class AzureWebPubSubResource(string name, Action<AzureResourceInfrastruct
     /// </summary>
     public BicepOutputReference Endpoint => new("endpoint", this);
 
-    private BicepOutputReference NameOutputReference => new("name", this);
+    /// <summary>
+    /// Gets the "name" output reference from the bicep template for the Azure Web PubSub resource.
+    /// </summary>
+    public BicepOutputReference NameOutputReference => new("name", this);
 
     /// <summary>
     /// Gets the connection string template for the manifest for Azure Web PubSub.
